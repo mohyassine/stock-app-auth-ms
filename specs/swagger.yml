@@ -1,0 +1,934 @@
+openapi: 3.0.0
+info:
+  description: |
+    Auth Microservice
+
+    [link to repo](https://<NASCO_BITBUCKET_URL>/nodejs-template)
+  version: '1.0'
+  title: Auth Microservice
+
+servers:
+  - url: http://localhost:{port}/
+    variables:
+      port:
+        default: "5050"
+    description: local server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+security:
+  - bearerAuth: []
+
+paths:
+  /:
+    get:
+      tags:
+        - default
+      summary: Get the default route
+      description: returns index
+      operationId: default
+      responses:
+        200:
+          description: successful api call, returns index
+          content:
+            application/vnd.nasco.auth: { }
+        400:
+          description: validation error
+        500:
+          description: an error occurred
+  /ready:
+    get:
+      tags:
+        - ready
+      summary: Checks if the server is up and ready
+      description: Checks if the server is up and ready
+      operationId: ready
+      responses:
+        204:
+          description: the server is up and ready
+        400:
+          description: validation error
+        500:
+          description: an error occurred
+  /users:
+    get:
+      tags:
+        - users
+      summary: Retrieve user information
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /users/usersEmails:
+    get:
+      tags:
+        - users
+      summary: Retrieve emails of users based on recipient type or persona IDs
+      parameters:
+        - in: query
+          name: recipientTypeCode
+          schema:
+            type: string
+          description: Type code for recipient (optional)
+        - in: query
+          name: personaIds
+          schema:
+            type: array
+            items:
+              type: string
+          description: Array of persona IDs (optional)
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /users/addInvite:
+    post:
+      tags:
+        - users
+      summary: Add credentials for an employee (persona) added to a client or entity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  example: "testFName"
+                lastName:
+                  type: string
+                  example: "testLName"
+                email:
+                  type: string
+                  format: email
+                  example: "testEmail@gmail.com"
+                type:
+                  type: string
+                  enum:
+                    - Corporate
+                    - Entity
+                  example: "Corporate"
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /users/sendEmail:
+    post:
+      tags:
+        - users
+      summary: Send an email to existing specific personas based on ids or type code
+      parameters:
+        - in: query
+          name: recipientTypeCode
+          schema:
+            type: string
+          description: Type code for recipient (optional)
+        - in: query
+          name: personaIds
+          schema:
+            type: object
+          description: IDs of personas (optional)
+        - in: query
+          name: emailType
+          schema:
+            type: string
+          required: true
+          description: Type of email to send
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /users/allUsers:
+    post:
+      tags:
+        - users
+      summary: Retrieve all users based on personaIds or profileIds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                personaIds:
+                  type: array
+                  items:
+                    type: string
+                profileIds:
+                  type: array
+                  items:
+                    type: string
+                limit:
+                  type: number
+                page:
+                  type: number
+                searchText:
+                  type: string
+                sortBy:
+                  type: string
+                sortOrder:
+                  type: string
+                  enum:
+                    - ASC
+                    - DESC
+                filters:
+                  type: string
+              required:
+                - personaIds
+                - profileIds
+      responses:
+        200:
+          description: Successful API call, returns filtered users
+          content:
+            application/vnd.nasco.auth: { }
+        400:
+          description: Validation error
+        500:
+          description: An error occurred
+  /users/updatePersona/{personaId}:
+    put:
+      tags:
+        - users
+      summary: Update persona details by ID
+      parameters:
+        - in: path
+          name: personaId
+          required: true
+          schema:
+            type: integer
+            format: int64
+            description: ID of the persona to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  example: "John"
+                lastName:
+                  type: string
+                  example: "Doe"
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /users/activateDeactivate/{personaId}:
+    put:
+      tags:
+        - users
+      summary: Activate or deactivate user by persona ID
+      parameters:
+        - in: path
+          name: personaId
+          required: true
+          schema:
+            type: integer
+            description: ID of the persona to activate or deactivate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deactivate:
+                  type: boolean
+                  example: true
+                  description: Set it to true to deactivate and false to activate.
+              required:
+                - deactivate
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /auth/validate/token:
+    post:
+      tags:
+        - auth
+      summary: Validate user token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  example: "example-token"
+              required:
+                - token
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /account/signin:
+    post:
+      tags:
+        - account
+      summary: Sign in user
+      description: Sign in user and get JWT token
+      operationId: signin
+      parameters:
+        - in: header
+          name: x-tenant-platform
+          description: Set the tenant platform
+          required: true
+          schema:
+            type: string
+            enum:
+              - NASCOEMIRATES
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: COMPANY1
+                password:
+                  type: string
+                  example: Password@123
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+    /account/signup:
+      post:
+        tags:
+          - account
+        summary: Sign up user
+        description: Register user on the platform and store the basic profile data in the database.
+        operationId: signup
+        parameters:
+        - in: header
+          name: x-tenant-platform
+          description: Set the tenant platform
+          required: true
+          schema:
+            type: string
+            enum:
+              - NASCOEMIRATES
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  password:
+                    type: string
+                  email:
+                    type: string
+                    format: email
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+        responses:
+          200:
+            description: success
+            content:
+              application/vnd.nasco.auth: {}
+          401:
+            description: Unauthorized - Expired or invalid authorization token
+            content:
+              application/vnd.nasco.auth:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: number
+                    message:
+                      type: string
+                example:
+                  status: 401
+                  message: Unauthorized
+          400:
+            description: validation error / Invalid header
+            content:
+              application/vnd.nasco.auth:
+                example:
+                  status: 400
+                  message: validation error
+          500:
+            description: an error occurred
+            content:
+              application/vnd.nasco.auth:
+                example:
+                  status: 500
+                  message: Internal server error
+  /account/verification/email:
+    post:
+      tags:
+        - account
+      summary: verify email
+      description: verify email by validating code
+      operationId: verifyEmail
+      parameters:
+        - in: header
+          name: x-tenant-platform
+          description: Set the tenant platform
+          required: true
+          schema:
+            type: string
+            enum:
+              - NASCOEMIRATES
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                  format: uuid
+                  example: 6b96d1d4-3092-41a8-8e31-8bf0a1ba30a8
+              required:
+                - code
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /account/recovery/password:
+    post:
+      tags:
+        - account
+      summary: used when a user has forgot his password and can't sign in
+      description: Sends OTP by EMAIL or SMS according to the user"s choice. If user selects the SMS channel and has not set their mobile number yet, the API will throw a `406 - Not Acceptable` error
+      operationId: requestPasswordRecovery
+      parameters:
+        - in: header
+          name: x-tenant-platform
+          description: Set the tenant platform
+          required: true
+          schema:
+            type: string
+            enum:
+              - NASCOEMIRATES
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: john.doe
+                isEmailChannel:
+                  type: boolean
+                  description: set this property to true if the user has a mobile number stored and yet prefers to receive the OTP by email
+              required:
+                - username
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /account/recovery/password/confirmation:
+    post:
+      tags:
+        - account
+      summary: confirm the password recovery request with OTP
+      description: check if OTP sent in the request is valid
+      operationId: confirmPasswordRecoveryCode
+      parameters:
+        - in: header
+          name: x-tenant-platform
+          description: Set the tenant platform
+          required: true
+          schema:
+            type: string
+            enum:
+              - NASCOEMIRATES
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: john.doe
+                otp:
+                  type: string
+                  example: 9V6FN8
+              required:
+                - username
+                - otp
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /account/recovery/password/reset:
+    post:
+      tags:
+        - account
+      summary: reset user password
+      description: resets user password
+      operationId: resetPassword
+      parameters:
+        - in: header
+          name: x-tenant-platform
+          description: Set the tenant platform
+          required: true
+          schema:
+            type: string
+            enum:
+              - NASCOEMIRATES
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: john.doe
+                newPassword:
+                  type: string
+                  format: password
+                  example: myPassword
+              required:
+                - username
+                - newPassword
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+  /account/recovery/username:
+    post:
+      tags:
+        - account
+      summary: recover username by email
+      description: Checks if email exists in the system, then sends an email including user"s username. If more than 1 account are linked to the same email, the username cannot be recovered (it will need additional info such as firstname, lastname, etc...)
+      operationId: recoverUsername
+      parameters:
+        - in: header
+          name: x-tenant-platform
+          description: Set the tenant platform
+          required: true
+          schema:
+            type: string
+            enum:
+              - NASCOEMIRATES
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+              required:
+                - email
+      responses:
+        200:
+          description: success
+          content:
+            application/vnd.nasco.auth: {}
+        401:
+          description: Unauthorized - Expired or invalid authorization token
+          content:
+            application/vnd.nasco.auth:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                  message:
+                    type: string
+              example:
+                status: 401
+                message: Unauthorized
+        400:
+          description: validation error / Invalid header
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 400
+                message: validation error
+        500:
+          description: an error occurred
+          content:
+            application/vnd.nasco.auth:
+              example:
+                status: 500
+                message: Internal server error
+
+
+
+

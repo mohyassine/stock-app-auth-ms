@@ -1,0 +1,17 @@
+apps:
+  - name: api-ms
+    script: app.js
+    time: true
+    watch: false
+    env:
+      ENV: dev
+      NODE_ENV: development
+    env_dev:
+      ENV: dev
+      NODE_ENV: development
+    env_uat:
+      ENV: uat
+      NODE_ENV: staging
+    env_prod:
+      ENV: prod
+      NODE_ENV: production
